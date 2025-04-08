@@ -13,32 +13,64 @@ For each nursery listed on the Calscape website, the scraper collects:
 - ✅ **Name** of the nursery  
 - ✅ **Address**  
 - ✅ **Phone number**  
-- ✅ **Email** (including decoding from Cloudflare email protection)  
+- ✅ **Email** (even if protected by Cloudflare)  
 - ✅ **Website URL**  
-- ✅ **List of available plants** from the nursery's inventory page (as a unique set of plant names)
+- ✅ **List of available plants** (from the nursery's inventory page, without duplicates)
+
+If the inventory page is empty or missing, the `inventory` field is set to `null`.
 
 ---
 
-## 🧠 How It Works
+## ⚙️ Setup Instructions
 
-1. **Starts** from the main nursery listing page:  
-   `https://calscape.org/california-nurseries`
+1. **Create and activate a virtual environment** (optional but recommended):
 
-2. For each nursery card found, the spider:
-   - Extracts metadata (name, address, phone, email, website)
-   - Follows the "View inventory" link
+```bash
+python -m venv venv
+source venv/bin/activate  # On Linux/macOS
+venv\Scripts\activate     # On Windows
+```
 
-3. On the inventory page (if it exists), it:
-   - Extracts the **names of all available plants**
-   - Removes duplicates and stores them as a **unique list**
+2. **Install dependencies** listed in `requirements.txt`:
 
-4. The email is extracted even when it's **protected by Cloudflare** (`data-cfemail`) thanks to a decoding function built into the spider.
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
-## 📝 Output Example
+## 🧪 How to Run the Scraper
 
-Each item is exported as a JSON object with the following structure:
+Use the following command to run the scraper and export the results to a JSON file:
+
+```bash
+scrapy crawl calscape -o nurseries.json
+```
+
+This will create a file named `nurseries.json` containing one entry per nursery.
+
+---
+
+## ⚠️ Notes on Request Rate
+
+By default, the scraper is configured to send **1 request per second** using:
+
+```python
+DOWNLOAD_DELAY = 1
+```
+
+You can **increase this delay** (e.g. to `2` or `3` seconds) if you notice the site becoming unresponsive or blocking requests.  
+This helps reduce the load on the server and improves reliability over long runs.
+
+To change it temporarily, you can also use:
+
+```bash
+scrapy crawl calscape -o nurseries.json -s DOWNLOAD_DELAY=2
+```
+
+---
+
+## 📝 Sample Output
 
 ```json
 {
@@ -55,4 +87,11 @@ Each item is exported as a JSON object with the following structure:
 }
 ```
 
-If no inventory is available, the `inventory` field is set to `null`.
+---
+
+## ⚖️ Legal Disclaimer
+
+This scraper accesses publicly available data and decodes obfuscated email addresses solely for educational or research purposes.  
+Please ensure that your usage of the extracted data complies with all applicable laws and the [Calscape.org terms of service](https://calscape.org).
+
+---
