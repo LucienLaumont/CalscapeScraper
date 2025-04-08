@@ -29,7 +29,11 @@ class CalscapeSpider(scrapy.Spider):
             item["name"] = card.css("h3 a::text").get(default="").strip()
             item["adress"] = card.css("div.address::text").get(default="").strip()
             item["phone"] = card.css("div.phone::text").get(default="").strip()
-            item["mail"] = card.css("div.email::text").get(default="").strip()
+            cfemail = card.css("div.email a.__cf_email__::attr(data-cfemail)").get()
+            if cfemail:
+                item["mail"] = self.decode_cfemail(cfemail)
+            else:
+                item["mail"] = None
             item["website_url"] = card.css("div.url a::attr(href)").get(default="").strip()
 
             inventory_link = card.css("div.reserve-btn a::attr(href)").get()
@@ -72,3 +76,9 @@ class CalscapeSpider(scrapy.Spider):
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:118.0) Gecko/20100101 Firefox/118.0",
         ]
         return random.choice(user_agents)
+    
+    def decode_cfemail(self, cfemail):
+        """Décode les emails protégés par Cloudflare (data-cfemail)"""
+        r = int(cfemail[:2], 16)
+        email = ''.join([chr(int(cfemail[i:i+2], 16) ^ r) for i in range(2, len(cfemail), 2)])
+        return email
