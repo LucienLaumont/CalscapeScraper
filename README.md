@@ -1,5 +1,3 @@
-Bien sûr ! Voici un exemple de **README.md** clair et structuré en anglais pour ton scraper Scrapy :
-
 ---
 
 # 🌿 Calscape Nursery Scraper
